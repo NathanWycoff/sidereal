@@ -8,9 +8,18 @@
 iscatr <- function(data, col = 'red', size = 5, width = NULL, height = NULL, 
                     elementId = NULL) {
 
+    # Ensure a default color
+    if (is.null(col)) {
+        col <- 'red'
+    }
+    if (is.null(size)) {
+        size <- 5
+    }
+
     colnames(data) <- c('x', 'y')
     data$title <- paste('a', as.character(1:nrow(data)), sep = '') 
     data$col <- col 
+    data$radius <- size
 
     #data$desc <- sapply(data$title, function(i) paste(rep(i, 10)))
 

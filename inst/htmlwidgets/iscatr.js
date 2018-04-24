@@ -12,8 +12,6 @@ HTMLWidgets.widget({
 
 
             renderValue: function(x) { 
-            //TODO: Make radius selectable.
-            var radius = 5;
 
                 if (!inited) {
                     inited = true;
@@ -56,7 +54,7 @@ HTMLWidgets.widget({
                         .attr("cx", function(d) {return(d.x)})
                         .attr("cy", function(d) {return(d.y)})
                         .attr("title", function(d) {return(d.title)})
-                        .attr("r", radius)
+                        .attr("r", function(d) {return(d.radius)})
                     //TODO: Make fill selectable.
                         .attr("fill", function(d) {return(d.col)});
 
@@ -68,8 +66,8 @@ HTMLWidgets.widget({
                                 .attr("cx", d.x = d3.event.x)
                                 .attr("cy", d.y = d3.event.y);
                             d3.select("#label_" + d.title)
-                                .attr("x", d.x + radius)
-                                .attr("y", d.y + radius);
+                                .attr("x", d.x + d.radius)
+                                .attr("y", d.y + d.radius);
                         })
                     // When we stop dragging a point, record its new position
                         .on("end", function(d) {
@@ -95,10 +93,10 @@ HTMLWidgets.widget({
                             return d.title;
                         })
                         .attr("x", function(d) {
-                            return d.x + radius;  // Returns scaled location of x
+                            return d.x + d.radius;  // Returns scaled location of x
                         })
                         .attr("y", function(d) {
-                            return d.y + radius;  // Returns scaled circle y
+                            return d.y + d.radius;  // Returns scaled circle y
                         })
                         .attr("id", function(d) {
                             return 'label_' + d.title;
@@ -158,10 +156,10 @@ HTMLWidgets.widget({
                         .transition()  // Transition from old to new
                         .duration(1000)  // Length of animation
                         .attr("x", function(d) {
-                            return d.x + radius;  // Circle's X
+                            return d.x + d.radius;  // Circle's X
                         })
                         .attr("y", function(d) {
-                            return d.y + radius;  // Circle's Y
+                            return d.y + d.radius;  // Circle's Y
                         })
 
                 }
