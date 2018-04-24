@@ -30,7 +30,7 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
     get_viz <- eventReactive(input$do, {
-                                 if (exists('fit')) {
+                                 if (!is.null(session$userData$fit)) {
                                      THETA_res <- fromJSON(input$cool_id)
 
                                      iter <- 0
@@ -43,23 +43,22 @@ server <- function(input, output, session) {
                                      print(THETA_fix)
 
                                      #TODO: Not a global var.
-                                     fit <<- num_post_plsv(ret$docs, K, V, P, eta, gamma, beta,
+                                     session$userData$fit <- num_post_plsv(ret$docs, K, V, P, eta, gamma, beta,
                                                            THETA_fix = THETA_fix,
-                                                           THETA_init = fit$par$THETA,
-                                                           PSI_init = fit$par$PSI,
-                                                           PHI_init = fit$par$PHI)
+                                                           THETA_init = session$userData$fit$par$THETA,
+                                                           PSI_init = session$userData$fit$par$PSI,
+                                                           PHI_init = session$userData$fit$par$PHI)
                                  } else {
-                                     fit <<- num_post_plsv(ret$docs, K, V, P, eta, gamma, beta)
+                                     session$userData$fit <- num_post_plsv(ret$docs, K, V, P, eta, gamma, beta)
                                  }
 
-                                 to_plot <- as.data.frame(rbind(fit$par$THETA, fit$par$PSI))
+                                 to_plot <- as.data.frame(rbind(session$userData$fit$par$THETA, session$userData$fit$par$PSI))
 
                                  return(to_plot)
                 })
 
     # example use of the automatically generated render function
     output$scatr1 <- renderIscatr({ 
-        print('asdfasdfas')
         data <- get_viz()
         iscatr(data, col = sample(c('red', 'green'), nrow(data), replace = TRUE))
     })

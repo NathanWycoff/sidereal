@@ -1,0 +1,10 @@
+We want to make a function which wraps all the shiny stuff, that we just pass another function to and everything takes care of itself.
+
+Some steps to this:
+    1) Wrap the existing stuff as a function with no arguments
+    2) customize arguments
+
+someday, we would love it if:
+    1) Way to have text with each point
+    2) display old positions of points on hover
+    3) moved points are different somehow, mabye color/size?
