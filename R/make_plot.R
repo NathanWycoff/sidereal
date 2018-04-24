@@ -3,9 +3,6 @@
 
 ## Make the default plot for now using iPLSV
 
-library(shiny)
-require(jsonlite)
-require(iplsv)
 
 
 #' A default test function
@@ -14,6 +11,9 @@ require(iplsv)
 #' @export 
 #Test out the num_max function.
 def_func <- function() {
+    library(shiny)
+    require(jsonlite)
+    require(iplsv)
     set.seed(1234)
 
     K <- 3
