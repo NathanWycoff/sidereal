@@ -71,7 +71,7 @@ iscatr <- function(data, col =NULL, size = NULL, name = NULL, width = NULL, heig
 #' @name iscatr-shiny
 #'
 #' @export
-iscatrOutput <- function(outputId, width = '100%', height = '400px'){
+iscatrOutput <- function(outputId, width = '100%', height = '800px'){
   htmlwidgets::shinyWidgetOutput(outputId, 'iscatr', width, height, package = 'sidereal')
 }
 

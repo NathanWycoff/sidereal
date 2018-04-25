@@ -16,6 +16,9 @@ HTMLWidgets.widget({
                 if (!inited) {
                     inited = true;
 
+                    // Make the plot square by taking the min of the height and the width to be both.
+                    el.plot_size = d3.min([height, width]);
+
                     // R gives us some data, but we need to convert that to locations on the 
                     // User's screen with the origin in the upper left corner.
                     // This means that the y axis needs to be flipped.
@@ -24,11 +27,11 @@ HTMLWidgets.widget({
                     var x_ax = d3.scaleLinear()
                         .domain([d3.min(x.data.map(function(d) {return d.x;})) - x_pad,
                             d3.max(x.data.map(function(d) {return d.x;})) + x_pad])
-                        .range([0, width]);
+                        .range([0, el.plot_size]);
                     var y_ax = d3.scaleLinear()
                         .domain([d3.min(x.data.map(function(d) {return -d.y;})) - y_pad,
                             d3.max(x.data.map(function(d) {return -d.y;})) + y_pad])
-                        .range([0, height]);
+                        .range([0, el.plot_size]);
 
 
                     // Transform the data to viz coordinates.
@@ -41,8 +44,8 @@ HTMLWidgets.widget({
 
                     //add svg circles
                     var svgContainer = d3.select("#" + el.id).append("svg")
-                        .attr("width", width)
-                        .attr("height", height);
+                        .attr("width", el.plot_size)
+                        .attr("height", el.plot_size);
 
                     var circles = svgContainer
                         .append("g")
@@ -82,7 +85,6 @@ HTMLWidgets.widget({
                                     'y' : -y_ax.invert(d3.event.y),
                                     'rid' : d.rid});
                             }
-                            console.log(el.moved_points);
 
                             // Give shiny the updated thing.
                             Shiny.onInputChange('moved_points', JSON.stringify(el.moved_points));
@@ -131,11 +133,11 @@ HTMLWidgets.widget({
                     var x_ax = d3.scaleLinear()
                         .domain([d3.min(x.data.map(function(d) {return d.x;})) - x_pad,
                             d3.max(x.data.map(function(d) {return d.x;})) + x_pad])
-                        .range([0, width]);
+                        .range([0, el.plot_size]);
                     var y_ax = d3.scaleLinear()
                         .domain([d3.min(x.data.map(function(d) {return -d.y;})) - y_pad,
                             d3.max(x.data.map(function(d) {return -d.y;})) + y_pad])
-                        .range([0, height]);
+                        .range([0, el.plot_size]);
 
 
                     // Transform the data to viz coordinates.
