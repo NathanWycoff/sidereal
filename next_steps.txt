@@ -3,9 +3,7 @@ We want to make a function which wraps all the shiny stuff, that we just pass an
 soon, we need to have:
     1) custom labels
     1.5) separate titles and the way we keep track of what's been touched in the server.
-    2) bugfix 1: onec update viz has been clicked, flush input$cool_id
-    3) bugfix 2: session seems to crash if relaunching the webapp (though bugfix 1 may solve this.)
-    4) bugfix 3: if a point is moved twice, we append instead of updating
+    5) The plot was square
 
 someday, we would love it if:
     1) Way to have text with each point

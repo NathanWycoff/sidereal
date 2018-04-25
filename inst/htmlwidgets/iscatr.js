@@ -55,11 +55,10 @@ HTMLWidgets.widget({
                         .attr("cy", function(d) {return(d.y)})
                         .attr("title", function(d) {return(d.title)})
                         .attr("r", function(d) {return(d.radius)})
-                    //TODO: Make fill selectable.
                         .attr("fill", function(d) {return(d.col)});
 
                     // When we drag a point, move that point
-                    var moved_points = [];
+                    el.moved_points = [];
                     var drag_handler = d3.drag()
                         .on("drag", function(d) {
                             d3.select(this)
@@ -71,12 +70,20 @@ HTMLWidgets.widget({
                         })
                     // When we stop dragging a point, record its new position
                         .on("end", function(d) {
-                            //TODO: smarter about this. In particular, need to update, not add, if a point is already in the list, and need to get rid of the list when the button is pushed.
-                            moved_points.push({'x' : x_ax.invert(d3.event.x), 
+                            // Update a points location if it's already recorded, add it to the array if it's not yet been recorded.
+                            ind = el.moved_points.findIndex(x => x.title == d.title);
+                            if (ind > 0) {
+                                el.moved_points[ind] = {'x' : x_ax.invert(d3.event.x), 
                                 'y' : -y_ax.invert(d3.event.y),
-                                'title' : this.__data__.title});
-                            // send message to shiny
-                            Shiny.onInputChange('cool_id', JSON.stringify(moved_points));
+                                'title' : this.__data__.title};
+                            } else {
+                                el.moved_points.push({'x' : x_ax.invert(d3.event.x), 
+                                    'y' : -y_ax.invert(d3.event.y),
+                                    'title' : this.__data__.title});
+                            }
+
+                            // Give shiny the updated thing.
+                            Shiny.onInputChange('moved_points', JSON.stringify(el.moved_points));
                         });
 
 
@@ -110,6 +117,9 @@ HTMLWidgets.widget({
 
                 } else {
                     // The logic for updating an existing plot
+
+                    // Flush the currently selected points.
+                    el.moved_points = [];
 
                     // R gives us some data, but we need to convert that to locations on the 
                     // User's screen with the origin in the upper left corner.

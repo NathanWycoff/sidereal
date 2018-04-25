@@ -23,7 +23,7 @@ int_scatter <- function(user_func) {
                                ),
                 server = function(input, output, session) {
                     get_viz <- eventReactive(input$do, {
-                                                 uf <- user_func(input$cool_id, session$userData)
+                                                 uf <- user_func(input$moved_points, session$userData)
                                                  session$userData <- uf$userData
 
                                                  if (is.null(uf$plot_data$points)) {
