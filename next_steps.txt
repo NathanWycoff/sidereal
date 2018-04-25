@@ -1,11 +1,11 @@
 We want to make a function which wraps all the shiny stuff, that we just pass another function to and everything takes care of itself.
 
 soon, we need to have:
-    1) custom labels
-    1.5) separate titles and the way we keep track of what's been touched in the server.
     5) The plot was square
 
 someday, we would love it if:
     1) Way to have text with each point
     2) display old positions of points on hover
     3) moved points are different somehow, mabye color/size?
+
+one this is all complete, do documentation.

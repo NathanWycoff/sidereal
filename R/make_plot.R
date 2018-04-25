@@ -23,6 +23,7 @@ int_scatter <- function(user_func) {
                                ),
                 server = function(input, output, session) {
                     get_viz <- eventReactive(input$do, {
+                                                 print(input$moved_points)
                                                  uf <- user_func(input$moved_points, session$userData)
                                                  session$userData <- uf$userData
 
@@ -35,7 +36,8 @@ int_scatter <- function(user_func) {
                     # example use of the automatically generated render function
                     output$scatr1 <- renderIscatr({ 
                         plot_data <- get_viz()
-                        iscatr(plot_data$points, col = plot_data$col, size = plot_data$size)
+                        iscatr(plot_data$points, col = plot_data$col, size = plot_data$size, name = plot_data$name)
+                        #do.call(iscatr, plot_data)
                     })
                 }))
 }

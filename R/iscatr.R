@@ -5,8 +5,12 @@
 #' @import htmlwidgets
 #'
 #' @export
-iscatr <- function(data, col = 'red', size = 5, width = NULL, height = NULL, 
+iscatr <- function(data, col =NULL, size = NULL, name = NULL, width = NULL, height = NULL, 
                     elementId = NULL) {
+
+    if (class(data) != "data.frame") {
+        stop("The points attribute of the user defined function's plot_data needs to be a data.frame")
+    }
 
     # Ensure a default color
     if (is.null(col)) {
@@ -15,11 +19,19 @@ iscatr <- function(data, col = 'red', size = 5, width = NULL, height = NULL,
     if (is.null(size)) {
         size <- 5
     }
+    if (is.null(name)) {
+        name <- paste('Point', as.character(1:nrow(data))) 
+    }
 
+    # Store our attributes in a data frame.
     colnames(data) <- c('x', 'y')
-    data$title <- paste('a', as.character(1:nrow(data)), sep = '') 
+    data$title <- 
     data$col <- col 
     data$radius <- size
+    data$name <- name
+
+    # An R ID identifying the row of each datum in the original R dataframe.
+    data$rid <- 1:nrow(data)
 
     #data$desc <- sapply(data$title, function(i) paste(rep(i, 10)))
 

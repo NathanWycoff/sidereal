@@ -53,7 +53,8 @@ HTMLWidgets.widget({
                         .append("circle")
                         .attr("cx", function(d) {return(d.x)})
                         .attr("cy", function(d) {return(d.y)})
-                        .attr("title", function(d) {return(d.title)})
+                        .attr("title", function(d) {return(d.name)})//TODO: Check what exactly this line does.
+                        .attr("rid", function(d) {return(d.rid)})
                         .attr("r", function(d) {return(d.radius)})
                         .attr("fill", function(d) {return(d.col)});
 
@@ -64,23 +65,24 @@ HTMLWidgets.widget({
                             d3.select(this)
                                 .attr("cx", d.x = d3.event.x)
                                 .attr("cy", d.y = d3.event.y);
-                            d3.select("#label_" + d.title)
+                            d3.select("#label_" + d.rid)
                                 .attr("x", d.x + d.radius)
                                 .attr("y", d.y + d.radius);
                         })
                     // When we stop dragging a point, record its new position
                         .on("end", function(d) {
                             // Update a points location if it's already recorded, add it to the array if it's not yet been recorded.
-                            ind = el.moved_points.findIndex(x => x.title == d.title);
-                            if (ind > 0) {
+                            ind = el.moved_points.findIndex(x => x.rid == d.rid);
+                            if (ind >= 0) {
                                 el.moved_points[ind] = {'x' : x_ax.invert(d3.event.x), 
                                 'y' : -y_ax.invert(d3.event.y),
-                                'title' : this.__data__.title};
+                                'rid' : d.rid};
                             } else {
                                 el.moved_points.push({'x' : x_ax.invert(d3.event.x), 
                                     'y' : -y_ax.invert(d3.event.y),
-                                    'title' : this.__data__.title});
+                                    'rid' : d.rid});
                             }
+                            console.log(el.moved_points);
 
                             // Give shiny the updated thing.
                             Shiny.onInputChange('moved_points', JSON.stringify(el.moved_points));
@@ -97,7 +99,7 @@ HTMLWidgets.widget({
                         .enter()
                         .append("text")
                         .text(function(d) {
-                            return d.title;
+                            return d.name;
                         })
                         .attr("x", function(d) {
                             return d.x + d.radius;  // Returns scaled location of x
@@ -106,7 +108,7 @@ HTMLWidgets.widget({
                             return d.y + d.radius;  // Returns scaled circle y
                         })
                         .attr("id", function(d) {
-                            return 'label_' + d.title;
+                            return 'label_' + d.rid;
                         })
                         .attr("font_family", "sans-serif")  // Font type
                         .attr("font-size", "11px")  // Font size
