@@ -60,10 +60,7 @@ HTMLWidgets.widget({
                         .attr("r", function(d) {return(d.radius)})
                         .attr("fill", function(d) {return(d.col)})
                         .on('mouseover', function(d) {// On mouseover, display a shadown on where the point used to be.
-                            console.log('in mouseover func');
-                            console.log(d);
                             if (d.hasOwnProperty('last_x')) {
-                                console.log('if statement triggered.');
                                 // Draw a shadow point
                                 svgContainer.append("circle")
                                     .attr("cx", d.last_x)

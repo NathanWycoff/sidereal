@@ -41,9 +41,6 @@ iscatr <- function(data, last_points, col =NULL, size = NULL, name = NULL, width
 
     p_data <- jsonlite::toJSON(data)
 
-    cat('data just before it leave iscatr')
-    print(p_data)
-
   # forward options using x
   x = list(
     data = p_data
