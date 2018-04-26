@@ -33,7 +33,6 @@ HTMLWidgets.widget({
                             d3.max(x.data.map(function(d) {return -d.y;})) + y_pad])
                         .range([0, el.plot_size]);
 
-
                     // Transform the data to viz coordinates.
                     init_vals = [];
                     for (let a of x.data) {
@@ -59,7 +58,41 @@ HTMLWidgets.widget({
                         .attr("title", function(d) {return(d.name)})//TODO: Check what exactly this line does.
                         .attr("rid", function(d) {return(d.rid)})
                         .attr("r", function(d) {return(d.radius)})
-                        .attr("fill", function(d) {return(d.col)});
+                        .attr("fill", function(d) {return(d.col)})
+                        .on('mouseover', function(d) {// On mouseover, display a shadown on where the point used to be.
+                            console.log('in mouseover func');
+                            console.log(d);
+                            if (d.hasOwnProperty('last_x')) {
+                                console.log('if statement triggered.');
+                                // Draw a shadow point
+                                svgContainer.append("circle")
+                                    .attr("cx", d.last_x)
+                                    .attr("cy", d.last_y)
+                                    .attr("r", 1.5 * d.radius)
+                                    .attr("fill", "grey")
+                                    .attr("id", "last_point" + d.rid);
+
+                                // Draw a line connecting shadow point and present point
+                                svgContainer.append("line")
+                                    .attr("x1", d.last_x)
+                                    .attr("y1", d.last_y)
+                                    .attr("x2", d.last_x)
+                                    .attr("y2", d.last_y)
+                                    .attr("stroke-width", 2)
+                                    .attr("stroke", "grey")
+                                    .attr("id", "last_line" + d.rid)
+                                    .transition()
+                                        .duration(200)
+                                        .attr("x2", d.x)
+                                        .attr("y2", d.y);
+                            }
+                        })
+                        .on('mouseout', function(d) {// Delete that shadown when the mouse moves.
+                            if (d.hasOwnProperty('last_x')) {
+                                d3.select("#last_point" + d.rid).remove();
+                                d3.select("#last_line" + d.rid).remove();
+                            }
+                        });
 
                     // When we drag a point, move that point
                     el.moved_points = [];
@@ -140,12 +173,16 @@ HTMLWidgets.widget({
                         .range([0, el.plot_size]);
 
 
-                    // Transform the data to viz coordinates.
-                    init_vals = [];
+                    // Transform the data to viz coordinates; help the point remember its previous location.
+                    // TODO: This next block is duplicated in code. It should instead be a function hwich is called twice.
+                    init_vals = [];//TODO: init_vals no longer needed.
                     for (let a of x.data) {
                         init_vals.push([a.x, a.y]);
+
                         a.x = x_ax(a.x);
                         a.y = y_ax(-a.y);
+                        a.last_x = x_ax(a.last_x);
+                        a.last_y = y_ax(-a.last_y);
                     }
 
 

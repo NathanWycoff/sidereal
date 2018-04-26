@@ -5,12 +5,14 @@
 #' @import htmlwidgets
 #'
 #' @export
-iscatr <- function(data, col =NULL, size = NULL, name = NULL, width = NULL, height = NULL, 
+iscatr <- function(data, last_points, col =NULL, size = NULL, name = NULL, width = NULL, height = NULL, 
                     elementId = NULL) {
 
     if (class(data) != "data.frame") {
         stop("The points attribute of the user defined function's plot_data needs to be a data.frame")
     }
+
+    colnames(data) <- c('x', 'y')
 
     # Ensure a default color
     if (is.null(col)) {
@@ -22,10 +24,12 @@ iscatr <- function(data, col =NULL, size = NULL, name = NULL, width = NULL, heig
     if (is.null(name)) {
         name <- paste('Point', as.character(1:nrow(data))) 
     }
+    if (!is.null(last_points)) {
+        data$last_x <- last_points[,1]
+        data$last_y <- last_points[,2]
+    }
 
     # Store our attributes in a data frame.
-    colnames(data) <- c('x', 'y')
-    data$title <- 
     data$col <- col 
     data$radius <- size
     data$name <- name
@@ -37,6 +41,8 @@ iscatr <- function(data, col =NULL, size = NULL, name = NULL, width = NULL, heig
 
     p_data <- jsonlite::toJSON(data)
 
+    cat('data just before it leave iscatr')
+    print(p_data)
 
   # forward options using x
   x = list(

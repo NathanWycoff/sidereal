@@ -1,6 +1,6 @@
 someday, we would love it if:
     1) Way to have text with each point
-    2) display old positions of points on hover
     3) moved points are different somehow, mabye color/size?
+    4) Procrustes Analysis available through R
 
 once this is all complete, do documentation.

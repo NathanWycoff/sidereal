@@ -23,19 +23,42 @@ int_scatter <- function(user_func) {
                                ),
                 server = function(input, output, session) {
                     get_viz <- eventReactive(input$do, {
-                                                 uf <- user_func(input$moved_points, session$userData)
-                                                 session$userData <- uf$userData
+                                                 cat('last points at very beginning')
+                                                 print(session$userData$last_points)
+
+                                                 uf <- user_func(input$moved_points, session$userData$pdata)
+                                                 session$userData$pdata <- uf$userData$pdata
+
 
                                                  if (is.null(uf$plot_data$points)) {
                                                      stop("User defined function needs to at least return a 'points' attribute; see examples")
                                                  }
-                                                 return(uf$plot_data)
+
+                                                 # Need to clone environment; not enough to assign to new var
+                                                 ud_copy <- as.environment(as.list(session$userData, all.names = TRUE))
+                                                 ret <- list(plot_data = uf$plot_data, 
+                                                             userData = ud_copy)
+
+                                                 cat('object being returned from user data')
+                                                 print(ret)
+                                                 cat('last points:')
+                                                 print(ret$userData$last_points)
+
+                                                 session$userData$last_points <- uf$plot_data$points
+
+                                                 cat('last points after ret')
+                                                 print(session$userData$last_points)
+
+                                                 return(ret)
                                })
 
                     # example use of the automatically generated render function
                     output$scatr1 <- renderIscatr({ 
-                        plot_data <- get_viz()
-                        iscatr(plot_data$points, col = plot_data$col, size = plot_data$size, name = plot_data$name)
+                        res <- get_viz()
+                        plot_data <- res$plot_data
+                        last_points <- res$userData$last_points
+                        iscatr(plot_data$points, last_points = last_points, 
+                               col = plot_data$col, size = plot_data$size, name = plot_data$name)
                         #do.call(iscatr, plot_data)
                     })
                 }))
