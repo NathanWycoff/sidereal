@@ -11,7 +11,7 @@ HTMLWidgets.widget({
         Shiny.addCustomMessageHandler("changeMode", changeMode);
 
         // this function is called by the handler, which passes the message
-        el.mode = "read";
+        el.mode ="int";
         function changeMode(mode){
             el.mode = mode;
             console.log("Mode is now:");

@@ -1,3 +1,5 @@
-1) Way to have text with each point
-2) points moved on last iteration and also moved on this iteration need to be distinct, perhaps another inverse outline?
-3) do documentation dog
+_ points moved on last iteration and also moved on this iteration need to be distinct, perhaps another inverse outline?
+_ do documentation dog
+
+one day:
+ - if a point has been moved this iteration, its shadow should first point to where it was placed by the algo, and then to where it was placed by the user (maybe in a different color?)

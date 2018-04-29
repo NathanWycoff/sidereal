@@ -36,28 +36,28 @@ int_scatter <- function(user_func, rot = FALSE, longtext = TRUE) {
     library(shiny)
     require(jsonlite)
 
-    # Create main panel. This differs when longtext is specified or not, that is, when there is a body of text accompanying each point.
+    ui_list <- list()
+    ui_list[[length(ui_list)+1]] <- titlePanel("Sidereal")
+    ui_list[[length(ui_list)+1]] <- actionButton("do", "Update Viz")
+
+    # We create a sidebar for documents, and don't if the data don't represent documents.
     if (longtext) {
-        mp <- 
-            sidebarLayout(
-                          sidebarPanel(textOutput("text_disp"))
-                          ,
-                          mainPanel(
-                                    iscatrOutput("scatr1")
-                                    )
-                          )
+        ui_list[[length(ui_list)+1]] <- radioButtons("mode", label = "Mode:", 
+                                                     choices = list("Interaction" = "int", "Reading" = "read"))
+        ui_list[[length(ui_list)+1]] <- sidebarLayout(
+                                                      sidebarPanel(textOutput("text_disp"))
+                                                      ,
+                                                      mainPanel(
+                                                                iscatrOutput("scatr1")
+                                                                )
+                                                      )
+
+
     } else {
-        mp <- iscatrOutput("scatr1")
+        ui_list[[length(ui_list)+1]]<- iscatrOutput("scatr1")
     }
 
-    runApp(list(ui = fluidPage(
-                               titlePanel("Sidereal"),
-
-                               actionButton("do", "Update Viz"),
-                               radioButtons("mode", label = "Mode:", 
-                                            choices = list("Reading" = "read", "Interaction" = "int")),
-                               mp#The main panel, created earlier.
-                               ),
+    runApp(list(ui = fluidPage(ui_list),
                 server = function(input, output, session) {
                     get_viz <- eventReactive(input$do, {
 
