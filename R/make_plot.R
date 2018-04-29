@@ -32,15 +32,29 @@ orth_proc <- function(A, B, comp_stress = TRUE) {
 #' @return Nothing, used for side effects.
 #' @export 
 #Test out the num_max function.
-int_scatter <- function(user_func, rot = FALSE) {
+int_scatter <- function(user_func, rot = FALSE, longtext = TRUE) {
     library(shiny)
     require(jsonlite)
 
-    runApp(list(ui = fluidPage(
-                               actionButton("do", "Update Viz"),
+    # Create main panel. This differs when longtext is specified or not, that is, when there is a body of text accompanying each point.
+    if (longtext) {
+        mp <- 
+            sidebarLayout(
+                          sidebarPanel(textOutput("text_disp"))
+                          ,
+                          mainPanel(
+                                    iscatrOutput("scatr1")
+                                    )
+                          )
+    } else {
+        mp <- iscatrOutput("scatr1")
+    }
 
-                               # example use of the automatically generated output function
-                               iscatrOutput("scatr1")
+    runApp(list(ui = fluidPage(
+                               titlePanel("Sidereal"),
+
+                               actionButton("do", "Update Viz"),
+                               mp#The main panel, created earlier.
                                ),
                 server = function(input, output, session) {
                     get_viz <- eventReactive(input$do, {
@@ -80,8 +94,13 @@ int_scatter <- function(user_func, rot = FALSE) {
                         plot_data <- res$plot_data
                         last_points <- res$userData$last_points
                         iscatr(plot_data$points, last_points = last_points, 
-                               col = plot_data$col, size = plot_data$size, name = plot_data$name)
+                               col = plot_data$col, size = plot_data$size, name = plot_data$name,
+                               longtext = plot_data$longtext)
                         #do.call(iscatr, plot_data)
+                    })
+                    output$text_disp <- renderText({ 
+                        req(input$text_contents)
+                        input$text_contents
                     })
                 }))
 }

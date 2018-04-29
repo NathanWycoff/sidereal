@@ -5,8 +5,8 @@
 #' @import htmlwidgets
 #'
 #' @export
-iscatr <- function(data, last_points, col =NULL, size = NULL, name = NULL, width = NULL, height = NULL, 
-                    elementId = NULL) {
+iscatr <- function(data, last_points, col =NULL, size = NULL, name = NULL, longtext = NULL, 
+                   width = NULL, height = NULL, elementId = NULL) {
 
     if (class(data) != "data.frame") {
         stop("The points attribute of the user defined function's plot_data needs to be a data.frame")
@@ -33,6 +33,7 @@ iscatr <- function(data, last_points, col =NULL, size = NULL, name = NULL, width
     data$col <- col 
     data$radius <- size
     data$name <- name
+    data$longtext <- longtext
 
     # An R ID identifying the row of each datum in the original R dataframe.
     data$rid <- 1:nrow(data)
