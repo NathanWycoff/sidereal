@@ -54,6 +54,8 @@ int_scatter <- function(user_func, rot = FALSE, longtext = TRUE) {
                                titlePanel("Sidereal"),
 
                                actionButton("do", "Update Viz"),
+                               radioButtons("mode", label = "Mode:", 
+                                            choices = list("Reading" = "read", "Interaction" = "int")),
                                mp#The main panel, created earlier.
                                ),
                 server = function(input, output, session) {
@@ -86,6 +88,12 @@ int_scatter <- function(user_func, rot = FALSE, longtext = TRUE) {
 
 
                                                  return(ret)
+                               })
+
+                    observeEvent(input$mode,{
+
+                                     # send the message to the event handler with name handler1 if we press the action button
+                                     session$sendCustomMessage("changeMode", input$mode)
                                })
 
                     # example use of the automatically generated render function

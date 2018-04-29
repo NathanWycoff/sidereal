@@ -8,6 +8,16 @@ HTMLWidgets.widget({
 
         var inited = false;
 
+        Shiny.addCustomMessageHandler("changeMode", changeMode);
+
+        // this function is called by the handler, which passes the message
+        el.mode = "read";
+        function changeMode(mode){
+            el.mode = mode;
+            console.log("Mode is now:");
+            console.log(el.mode);
+        }
+
         // Initialize some color based functions
         // Credit to SE user Greg at https://stackoverflow.com/questions/1573053/javascript-function-to-convert-color-names-to-hex-codes
         function colourNameToHex(colour)
@@ -157,42 +167,50 @@ HTMLWidgets.widget({
                             }
                         })
                         .on('dblclick', function(d) {
-                            Shiny.onInputChange('text_contents', d.longtext);
+                            if (el.mode === "read") {
+                                Shiny.onInputChange('text_contents', d.longtext);
+                            }
                         });
 
                     // When we drag a point, move that point
                     el.moved_points = [];
                     var drag_handler = d3.drag()
                         .on("start", function(d) {
-                            d3.select(this)
-                                .attr("stroke", invertColor(colourNameToHex(d.col)))
-                                .attr("touched", "yes")
-                                .attr("stroke-width", 2);
+                            if (el.mode === "int") {
+                                d3.select(this)
+                                    .attr("stroke", invertColor(colourNameToHex(d.col)))
+                                    .attr("touched", "yes")
+                                    .attr("stroke-width", 2);
+                            }
                         })
                         .on("drag", function(d) {
-                            d3.select(this)
-                                .attr("cx", d.x = d3.event.x)
-                                .attr("cy", d.y = d3.event.y);
-                            d3.select("#label_" + d.rid)
-                                .attr("x", d.x + d.radius)
-                                .attr("y", d.y + d.radius);
+                            if (el.mode === "int") {
+                                d3.select(this)
+                                    .attr("cx", d.x = d3.event.x)
+                                    .attr("cy", d.y = d3.event.y);
+                                d3.select("#label_" + d.rid)
+                                    .attr("x", d.x + d.radius)
+                                    .attr("y", d.y + d.radius);
+                            }
                         })
                     // When we stop dragging a point, record its new position
                         .on("end", function(d) {
                             // Update a points location if it's already recorded, add it to the array if it's not yet been recorded.
-                            ind = el.moved_points.findIndex(x => x.rid == d.rid);
-                            if (ind >= 0) {
-                                el.moved_points[ind] = {'x' : x_ax.invert(d3.event.x), 
-                                    'y' : -y_ax.invert(d3.event.y),
-                                    'rid' : d.rid};
-                            } else {
-                                el.moved_points.push({'x' : x_ax.invert(d3.event.x), 
-                                    'y' : -y_ax.invert(d3.event.y),
-                                    'rid' : d.rid});
-                            }
+                            if (el.mode === "int") {
+                                ind = el.moved_points.findIndex(x => x.rid == d.rid);
+                                if (ind >= 0) {
+                                    el.moved_points[ind] = {'x' : x_ax.invert(d3.event.x), 
+                                        'y' : -y_ax.invert(d3.event.y),
+                                        'rid' : d.rid};
+                                } else {
+                                    el.moved_points.push({'x' : x_ax.invert(d3.event.x), 
+                                        'y' : -y_ax.invert(d3.event.y),
+                                        'rid' : d.rid});
+                                }
 
-                            // Give shiny the updated thing.
-                            Shiny.onInputChange('moved_points', JSON.stringify(el.moved_points));
+                                // Give shiny the updated thing.
+                                Shiny.onInputChange('moved_points', JSON.stringify(el.moved_points));
+                            }
                         });
 
 
@@ -223,6 +241,7 @@ HTMLWidgets.widget({
 
                     //Store the SVG so we can update it with new data.
                     el.svgContainer = svgContainer;
+
 
                 } else {
                     // The logic for updating an existing plot
