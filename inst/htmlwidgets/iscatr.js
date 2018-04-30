@@ -12,8 +12,12 @@ HTMLWidgets.widget({
             console.log("Voice Commands Enabled");
             var commands = {
                 'update display': function() {
+                    console.log("Ayy papi");
                     cool_memes += 1;
-                    Shiny.onInputChange("do", cool_memes);
+                    Shiny.onInputChange("update", cool_memes);
+                },
+                'show help' : function() {
+                    startHelp();
                 },
                 'show traces' : function() {
                     Shiny.onInputChange("traces", 1);
@@ -28,6 +32,11 @@ HTMLWidgets.widget({
 
             // Start listening.
             annyang.start();
+
+            annyang.addCallback('result', function(phrases) {
+                console.log("I think the user said: ", phrases[0]);
+                console.log("But then again, it could be any of the following: ", phrases);
+            });
 
             // Listen for annyang errors
         } else {
@@ -120,17 +129,9 @@ HTMLWidgets.widget({
         function dispShadow(d) {
             if (d.hasOwnProperty('last_x')) {
                 // Get direction of line
-                console.log("New");
-                console.log(d);
                 dir = [d.last_x - d.x, d.last_y - d.y];
-                console.log(dir);
-                console.log(Math.pow(dir[0], 2));
-                console.log(Math.pow(dir[1], 2));
-                console.log(Math.pow(dir[0], 2) + Math.pow(d[2], 2));
                 norm = Math.sqrt(Math.pow(dir[0], 2) + Math.pow(dir[1], 2));
-                console.log(norm);
                 dir = [dir[0] / norm, dir[1] / norm];
-                console.log(dir);
 
                 // Draw a shadow point
                 el.svgContainer.append("circle")

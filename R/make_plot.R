@@ -35,7 +35,7 @@ orth_proc <- function(A, B, comp_stress = TRUE) {
 int_scatter <- function(user_func, rot = FALSE, longtext = TRUE) {
     helpData <- data.frame(cbind(
                                  c(1, 2, 3, 4, 5, 6),
-                                 c("Welcome to Interactive Topics with Sidereal!", "This scatterplot displays documents together with topics", "In interaction mode, you can drag topics and documents around in the scatterplot to form new topics", "Click 'Update Display' when you're ready", "In Reading Mode, double click a document to read its text, or a topic to see its top words", "After updating the display, hover over a point to see how it's moved, or click Show Traces to see how they have all moved"),
+                                 c("Welcome to Interactive Topics with Sidereal!", "This scatterplot displays documents together with topics", "In interaction mode, you can drag topics and documents around in the scatterplot to form new topics", "Click 'Update Display' when you're ready", "In Reading Mode, double click a document to read its text, or a topic to see its top words", "After updating the display, hover over a point to see how it's moved, or click Show Traces to see how every point has moved"),
                                  c(NA, "#scatr1", "#mode", "#update", "#mode", "#traces"),
                                  c("auto", "auto", "auto", "auto", "auto", "auto")
                                  ))
@@ -79,7 +79,13 @@ int_scatter <- function(user_func, rot = FALSE, longtext = TRUE) {
                                                  cat("Moved points in server func:\n")
                                                  print(input$moved_points)
 
-                                                 uf <- user_func(input$moved_points, session$userData$pdata)
+                                                 if (!is.null(input$moved_points)) {
+                                                     mp <- fromJSON(input$moved_points)
+                                                 } else {
+                                                     mp <- NULL
+                                                 }
+
+                                                 uf <- user_func(mp, session$userData$pdata)
                                                  session$userData$pdata <- uf$pdata
 
                                                  if (is.null(uf$plot_data$points)) {
@@ -117,7 +123,7 @@ int_scatter <- function(user_func, rot = FALSE, longtext = TRUE) {
                     observeEvent(input$traces, {
                                      if (input$traces %% 2 == 1) {
                                          updateActionButton(session, "traces",
-                                                            label = "Hide Traces")
+                                                            label = "Remove Traces")
 
                                          # send the message to the event handler with name handler1 if we press the action button
                                          session$sendCustomMessage("showTraces",input$traces)
