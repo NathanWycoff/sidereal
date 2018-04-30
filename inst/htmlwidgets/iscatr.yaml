@@ -3,3 +3,7 @@ dependencies:
   version: 5.1.0
   src: htmlwidgets
   script: ./lib/d3.js
+- name: annyang
+  version: 2.6.0
+  src: htmlwidgets
+  script: ./lib/annyang.min.js

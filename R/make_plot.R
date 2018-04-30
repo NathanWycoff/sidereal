@@ -38,7 +38,8 @@ int_scatter <- function(user_func, rot = FALSE, longtext = TRUE) {
 
     ui_list <- list()
     ui_list[[length(ui_list)+1]] <- titlePanel("Sidereal")
-    ui_list[[length(ui_list)+1]] <- actionButton("do", "Update Viz")
+    ui_list[[length(ui_list)+1]] <- actionButton("do", "Update Display")
+    ui_list[[length(ui_list)+1]] <- actionButton("traces", "Show Traces")
 
     # We create a sidebar for documents, and don't if the data don't represent documents.
     if (longtext) {
@@ -61,6 +62,7 @@ int_scatter <- function(user_func, rot = FALSE, longtext = TRUE) {
                 server = function(input, output, session) {
                     get_viz <- eventReactive(input$do, {
 
+                                                 cat("Moved points in server func:\n")
                                                  print(input$moved_points)
 
                                                  uf <- user_func(input$moved_points, session$userData$pdata)
@@ -94,6 +96,22 @@ int_scatter <- function(user_func, rot = FALSE, longtext = TRUE) {
 
                                      # send the message to the event handler with name handler1 if we press the action button
                                      session$sendCustomMessage("changeMode", input$mode)
+                               })
+
+                    observeEvent(input$traces, {
+                                     if (input$traces %% 2 == 1) {
+                                         updateActionButton(session, "traces",
+                                                            label = "Hide Traces")
+
+                                         # send the message to the event handler with name handler1 if we press the action button
+                                         session$sendCustomMessage("showTraces",input$traces)
+                                     } else {
+                                         updateActionButton(session, "traces",
+                                                            label = "Show Traces")
+
+                                         # send the message to the event handler with name handler1 if we press the action button
+                                         session$sendCustomMessage("hideTraces",input$traces)
+                                     }
                                })
 
                     # example use of the automatically generated render function

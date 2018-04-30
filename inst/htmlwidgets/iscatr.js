@@ -6,16 +6,57 @@ HTMLWidgets.widget({
 
     factory: function(el, width, height) {
 
+        var cool_memes = 0;
+
+        if (annyang) {
+            console.log("Voice Commands Enabled");
+            var commands = {
+                'update display': function() {
+                    cool_memes += 1;
+                    Shiny.onInputChange("do", cool_memes);
+                },
+                'show traces' : function() {
+                    Shiny.onInputChange("traces", 1);
+                },
+                'remove traces' : function() {
+                    Shiny.onInputChange("traces", 2);
+                }
+            };
+
+            // Add our commands to annyang
+            annyang.addCommands(commands);
+
+            // Start listening.
+            annyang.start();
+
+            // Listen for annyang errors
+            annyang.addCallback('error', function() {
+                console.log('There was an error in Annyang!');
+            });
+        } else {
+            console.log("Voice Commands not Enabled; Use Chrome");
+        }
+
         var inited = false;
 
         Shiny.addCustomMessageHandler("changeMode", changeMode);
+        Shiny.addCustomMessageHandler("showTraces", showTraces);
+        Shiny.addCustomMessageHandler("hideTraces", hideTraces);
 
         // this function is called by the handler, which passes the message
         el.mode ="int";
         function changeMode(mode){
             el.mode = mode;
-            console.log("Mode is now:");
-            console.log(el.mode);
+        }
+        function showTraces(unused) {
+            for (let d of el.data) {
+                dispShadow(d);
+            }
+        } 
+        function hideTraces(unused) {
+            for (let d of el.data) {
+                hideShadow(d);
+            } 
         }
 
         // Initialize some color based functions
@@ -79,38 +120,82 @@ HTMLWidgets.widget({
             return (zeros + str).slice(-len);
         }
 
+        function dispShadow(d) {
+            if (d.hasOwnProperty('last_x')) {
+                // Draw a shadow point
+                el.svgContainer.append("circle")
+                    .attr("cx", d.last_x)
+                    .attr("cy", d.last_y)
+                    .attr("r", 1.5 * d.radius)
+                    .attr("fill", "grey")
+                    .attr("id", "last_point" + d.rid)
+                    .attr("opacity", 0.5);
+
+                // Draw a line connecting shadow point and present point
+                el.svgContainer.append("line")
+                    .attr("x1", d.last_x)
+                    .attr("y1", d.last_y)
+                    .attr("x2", d.last_x)
+                    .attr("y2", d.last_y)
+                    .attr("stroke-width", 2)
+                    .attr("stroke", "grey")
+                    .attr("id", "last_line" + d.rid)
+                    .transition()
+                    .duration(200)
+                    .attr("x2", d.x)
+                    .attr("y2", d.y)
+                    .attr("opacity", 0.5);
+            }
+        }
+
+        function hideShadow(d) {
+            if (d.hasOwnProperty('last_x')) {
+                d3.select("#last_point" + d.rid).remove();
+                d3.select("#last_line" + d.rid).remove();
+            }
+
+        }
+        // Make the plot square by taking the min of the height and the width to be both.
+        el.plot_size = d3.min([height, width]);
+
         return {
 
 
             renderValue: function(x) { 
 
+                // R gives us some data, but we need to convert that to locations on the 
+                // User's screen with the origin in the upper left corner.
+                // This means that the y axis needs to be flipped.
+                x_pad = 0.5 * d3.deviation(x.data, function(d) {return(d.x)})
+                y_pad = 0.5 * d3.deviation(x.data, function(d) {return(d.y)})
+                var x_ax = d3.scaleLinear()
+                    .domain([d3.min(x.data.map(function(d) {return d.x;})) - x_pad,
+                        d3.max(x.data.map(function(d) {return d.x;})) + x_pad])
+                    .range([0, el.plot_size]);
+                var y_ax = d3.scaleLinear()
+                    .domain([d3.min(x.data.map(function(d) {return -d.y;})) - y_pad,
+                        d3.max(x.data.map(function(d) {return -d.y;})) + y_pad])
+                    .range([0, el.plot_size]);
+
+
+                // Transform the data to viz coordinates; help the point remember its previous location.
+                for (let a of x.data) {
+                    a.x = x_ax(a.x);
+                    a.y = y_ax(-a.y);
+
+                    if (inited) {
+                        a.last_x = x_ax(a.last_x);
+                        a.last_y = y_ax(-a.last_y);
+                    }
+                }
+
+
+                // Create a deep copy of our data.
+                el.data = JSON.parse(JSON.stringify(x.data));
+
                 if (!inited) {
                     inited = true;
 
-                    // Make the plot square by taking the min of the height and the width to be both.
-                    el.plot_size = d3.min([height, width]);
-
-                    // R gives us some data, but we need to convert that to locations on the 
-                    // User's screen with the origin in the upper left corner.
-                    // This means that the y axis needs to be flipped.
-                    x_pad = 0.5 * d3.deviation(x.data, function(d) {return(d.x)})
-                    y_pad = 0.5 * d3.deviation(x.data, function(d) {return(d.y)})
-                    var x_ax = d3.scaleLinear()
-                        .domain([d3.min(x.data.map(function(d) {return d.x;})) - x_pad,
-                            d3.max(x.data.map(function(d) {return d.x;})) + x_pad])
-                        .range([0, el.plot_size]);
-                    var y_ax = d3.scaleLinear()
-                        .domain([d3.min(x.data.map(function(d) {return -d.y;})) - y_pad,
-                            d3.max(x.data.map(function(d) {return -d.y;})) + y_pad])
-                        .range([0, el.plot_size]);
-
-                    // Transform the data to viz coordinates.
-                    init_vals = [];
-                    for (let a of x.data) {
-                        init_vals.push([a.x, a.y]);
-                        a.x = x_ax(a.x);
-                        a.y = y_ax(-a.y);
-                    }
 
                     //add svg circles
                     var svgContainer = d3.select("#" + el.id).append("svg")
@@ -132,39 +217,10 @@ HTMLWidgets.widget({
                         .attr("fill", function(d) {return(d.col)})
                         .attr("touched", "no")
                         .on('mouseover', function(d) {// On mouseover, display a shadown on where the point used to be.
-                            console.log("yeah boi");
-                            if (d.hasOwnProperty('last_x')) {
-                                console.log("yeah boisss");
-                                console.log(d.last_x);
-                                console.log(d.last_y);
-                                // Draw a shadow point
-                                svgContainer.append("circle")
-                                    .attr("cx", d.last_x)
-                                    .attr("cy", d.last_y)
-                                    .attr("r", 1.5 * d.radius)
-                                    .attr("fill", "grey")
-                                    .attr("id", "last_point" + d.rid);
-
-                                // Draw a line connecting shadow point and present point
-                                svgContainer.append("line")
-                                    .attr("x1", d.last_x)
-                                    .attr("y1", d.last_y)
-                                    .attr("x2", d.last_x)
-                                    .attr("y2", d.last_y)
-                                    .attr("stroke-width", 2)
-                                    .attr("stroke", "grey")
-                                    .attr("id", "last_line" + d.rid)
-                                    .transition()
-                                    .duration(200)
-                                    .attr("x2", d.x)
-                                    .attr("y2", d.y);
-                            }
+                            dispShadow(d);
                         })
                         .on('mouseout', function(d) {// Delete that shadown when the mouse moves.
-                            if (d.hasOwnProperty('last_x')) {
-                                d3.select("#last_point" + d.rid).remove();
-                                d3.select("#last_line" + d.rid).remove();
-                            }
+                            hideShadow(d);
                         })
                         .on('dblclick', function(d) {
                             if (el.mode === "read") {
@@ -244,38 +300,11 @@ HTMLWidgets.widget({
 
 
                 } else {
+
                     // The logic for updating an existing plot
 
                     // Flush the currently selected points.
                     el.moved_points = [];
-
-                    // R gives us some data, but we need to convert that to locations on the 
-                    // User's screen with the origin in the upper left corner.
-                    // This means that the y axis needs to be flipped.
-                    x_pad = 0.5 * d3.deviation(x.data, function(d) {return(d.x)})
-                    y_pad = 0.5 * d3.deviation(x.data, function(d) {return(d.y)})
-                    var x_ax = d3.scaleLinear()
-                        .domain([d3.min(x.data.map(function(d) {return d.x;})) - x_pad,
-                            d3.max(x.data.map(function(d) {return d.x;})) + x_pad])
-                        .range([0, el.plot_size]);
-                    var y_ax = d3.scaleLinear()
-                        .domain([d3.min(x.data.map(function(d) {return -d.y;})) - y_pad,
-                            d3.max(x.data.map(function(d) {return -d.y;})) + y_pad])
-                        .range([0, el.plot_size]);
-
-
-                    // Transform the data to viz coordinates; help the point remember its previous location.
-                    // TODO: This next block is duplicated in code. It should instead be a function hwich is called twice.
-                    init_vals = [];//TODO: init_vals no longer needed.
-                    for (let a of x.data) {
-                        init_vals.push([a.x, a.y]);
-
-                        a.x = x_ax(a.x);
-                        a.y = y_ax(-a.y);
-                        a.last_x = x_ax(a.last_x);
-                        a.last_y = y_ax(-a.last_y);
-                    }
-
 
                     // Update circles
                     el.svgContainer.selectAll("circle")
@@ -314,9 +343,7 @@ HTMLWidgets.widget({
                             return d.y + d.radius;  // Circle's Y
                         })
 
-                }
-
-            },
+                }},
 
             resize: function(width, height) {
 
