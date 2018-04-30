@@ -30,9 +30,6 @@ HTMLWidgets.widget({
             annyang.start();
 
             // Listen for annyang errors
-            annyang.addCallback('error', function() {
-                console.log('There was an error in Annyang!');
-            });
         } else {
             console.log("Voice Commands not Enabled; Use Chrome");
         }
@@ -122,6 +119,19 @@ HTMLWidgets.widget({
 
         function dispShadow(d) {
             if (d.hasOwnProperty('last_x')) {
+                // Get direction of line
+                console.log("New");
+                console.log(d);
+                dir = [d.last_x - d.x, d.last_y - d.y];
+                console.log(dir);
+                console.log(Math.pow(dir[0], 2));
+                console.log(Math.pow(dir[1], 2));
+                console.log(Math.pow(dir[0], 2) + Math.pow(d[2], 2));
+                norm = Math.sqrt(Math.pow(dir[0], 2) + Math.pow(dir[1], 2));
+                console.log(norm);
+                dir = [dir[0] / norm, dir[1] / norm];
+                console.log(dir);
+
                 // Draw a shadow point
                 el.svgContainer.append("circle")
                     .attr("cx", d.last_x)
@@ -133,17 +143,17 @@ HTMLWidgets.widget({
 
                 // Draw a line connecting shadow point and present point
                 el.svgContainer.append("line")
-                    .attr("x1", d.last_x)
-                    .attr("y1", d.last_y)
-                    .attr("x2", d.last_x)
-                    .attr("y2", d.last_y)
+                    .attr("x1", d.last_x - dir[0] * 1.5 * d.radius)
+                    .attr("y1", d.last_y - dir[1] * 1.5 * d.radius)
+                    .attr("x2", d.last_x - dir[0] * 1.5 * d.radius)
+                    .attr("y2", d.last_y - dir[1] * 1.5 * d.radius)
                     .attr("stroke-width", 2)
                     .attr("stroke", "grey")
                     .attr("id", "last_line" + d.rid)
                     .transition()
                     .duration(200)
-                    .attr("x2", d.x)
-                    .attr("y2", d.y)
+                    .attr("x2", d.x + dir[0] * d.radius)
+                    .attr("y2", d.y + dir[1] * d.radius)
                     .attr("opacity", 0.5);
             }
         }
@@ -200,7 +210,8 @@ HTMLWidgets.widget({
                     //add svg circles
                     var svgContainer = d3.select("#" + el.id).append("svg")
                         .attr("width", el.plot_size)
-                        .attr("height", el.plot_size);
+                        .attr("height", el.plot_size)
+                        .attr("id", "mainplot");
 
                     var circles = svgContainer
                         .append("g")

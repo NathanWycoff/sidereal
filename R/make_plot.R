@@ -33,12 +33,23 @@ orth_proc <- function(A, B, comp_stress = TRUE) {
 #' @export 
 #Test out the num_max function.
 int_scatter <- function(user_func, rot = FALSE, longtext = TRUE) {
+    helpData <- data.frame(cbind(
+                                 c(1, 2, 3, 4, 5, 6),
+                                 c("Welcome to Interactive Topics with Sidereal!", "This scatterplot displays documents together with topics", "In interaction mode, you can drag topics and documents around in the scatterplot to form new topics", "Click 'Update Display' when you're ready", "In Reading Mode, double click a document to read its text, or a topic to see its top words", "After updating the display, hover over a point to see how it's moved, or click Show Traces to see how they have all moved"),
+                                 c(NA, "#scatr1", "#mode", "#update", "#mode", "#traces"),
+                                 c("auto", "auto", "auto", "auto", "auto", "auto")
+                                 ))
+    colnames(helpData) <- c("step", "intro", "element", "position")
+
     library(shiny)
+    #TODO: Download these with the app somehow automatically.
     require(jsonlite)
+    require(plyr)
+    require(FrissIntroJSBasic)#TODO: This one will be hardest to download.
 
     ui_list <- list()
     ui_list[[length(ui_list)+1]] <- titlePanel("Sidereal")
-    ui_list[[length(ui_list)+1]] <- actionButton("do", "Update Display")
+    ui_list[[length(ui_list)+1]] <- actionButton("update", "Update Display")
     ui_list[[length(ui_list)+1]] <- actionButton("traces", "Show Traces")
 
     # We create a sidebar for documents, and don't if the data don't represent documents.
@@ -58,9 +69,12 @@ int_scatter <- function(user_func, rot = FALSE, longtext = TRUE) {
         ui_list[[length(ui_list)+1]]<- iscatrOutput("scatr1")
     }
 
+    ui_list[[length(ui_list)+1]]<- addIntroJS()
+
     runApp(list(ui = fluidPage(ui_list),
                 server = function(input, output, session) {
-                    get_viz <- eventReactive(input$do, {
+                    initIntroJS(session, helpData)
+                    get_viz <- eventReactive(input$update, {
 
                                                  cat("Moved points in server func:\n")
                                                  print(input$moved_points)
@@ -82,6 +96,8 @@ int_scatter <- function(user_func, rot = FALSE, longtext = TRUE) {
 
                                                  # Need to clone environment; not enough to assign to new var
                                                  ud_copy <- as.environment(as.list(session$userData, all.names = TRUE))
+
+
                                                  ret <- list(plot_data = uf$plot_data, 
                                                              userData = ud_copy)
 
