@@ -30,9 +30,6 @@ HTMLWidgets.widget({
             // Add our commands to annyang
             annyang.addCommands(commands);
 
-            // Start listening.
-            annyang.start();
-
             annyang.addCallback('result', function(phrases) {
                 console.log("I think the user said: ", phrases[0]);
                 console.log("But then again, it could be any of the following: ", phrases);
@@ -40,7 +37,7 @@ HTMLWidgets.widget({
 
             // Listen for annyang errors
         } else {
-            console.log("Voice Commands not Enabled; Use Chrome");
+            console.log("Voice Commands not Enabled; Try using chrome / checking mic");
         }
 
         var inited = false;
@@ -166,6 +163,11 @@ HTMLWidgets.widget({
             }
 
         }
+
+        // i is a documents rid
+        function showText(i) {
+            Shiny.onInputChange('text_contents', el.data[i-1].longtext);
+        }
         // Make the plot square by taking the min of the height and the width to be both.
         el.plot_size = d3.min([height, width]);
 
@@ -173,6 +175,7 @@ HTMLWidgets.widget({
 
 
             renderValue: function(x) { 
+
 
                 // R gives us some data, but we need to convert that to locations on the 
                 // User's screen with the origin in the upper left corner.
@@ -203,6 +206,20 @@ HTMLWidgets.widget({
 
                 // Create a deep copy of our data.
                 el.data = JSON.parse(JSON.stringify(x.data));
+
+                if (annyang) {
+                    //Add commands to show each document.
+                    var doc_commands = {};
+                    for (let d of el.data) {
+                        doc_commands['show ' + d.name] = function(a) {
+                            showText(d.rid);
+                        }
+                        annyang.addCommands(doc_commands);
+                        // Start listening.
+                        annyang.start();
+                    }
+                }
+
 
                 if (!inited) {
                     inited = true;
@@ -236,7 +253,7 @@ HTMLWidgets.widget({
                         })
                         .on('dblclick', function(d) {
                             if (el.mode === "read") {
-                                Shiny.onInputChange('text_contents', d.longtext);
+                                showText(d.rid);
                             }
                         });
 
